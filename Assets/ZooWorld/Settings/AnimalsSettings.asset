@@ -32,12 +32,15 @@ MonoBehaviour:
       data:
         _animal: {fileID: 4409831037783304474, guid: 109e8e99bae2ba8498191dc4a997bc70, type: 3}
         _strength: 0
+        _canEatSameStrength: 0
         _moveStrategy:
           rid: 3695179428141465602
     - rid: 3695179428141465602
       type: {class: JumpMovement, ns: ZooWorld.Runtime.Movements, asm: ZooWorld}
       data:
         _power: 3
+        _jumpDelayMin: 1
+        _jumpDelayMax: 3
         _directions:
         - {x: 1, y: 0, z: 1}
         - {x: 1, y: 0, z: -1}
@@ -48,11 +51,14 @@ MonoBehaviour:
       data:
         _animal: {fileID: 4409831037783304474, guid: 242a75842257ecc41be5903ac0c4f129, type: 3}
         _strength: 1
+        _canEatSameStrength: 1
         _moveStrategy:
           rid: 3695179428141465604
     - rid: 3695179428141465604
       type: {class: LinearMovement, ns: ZooWorld.Runtime.Movements, asm: ZooWorld}
       data:
+        _directionChangeTimeMin: 1.5
+        _directionChangeTimeMax: 3
         _directions:
         - {x: 1, y: 0, z: 1}
         - {x: 1, y: 0, z: -1}

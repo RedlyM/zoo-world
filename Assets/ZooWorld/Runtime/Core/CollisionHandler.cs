@@ -18,6 +18,13 @@ namespace ZooWorld.Runtime.Core
 
             if (self.Strength == otherModel.Strength)
             {
+                if (self.CanEatSameStrength)
+                {
+                    return self.LifetimeSeconds.Value < otherModel.LifetimeSeconds.Value
+                        ? CollisionResult.Kill
+                        : CollisionResult.Die;
+                }
+
                 return CollisionResult.Nothing;
             }
 

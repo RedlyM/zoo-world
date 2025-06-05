@@ -17,23 +17,27 @@ namespace ZooWorld.Runtime.Gameplay
         private readonly GameplayView _view;
         private readonly AnimalsSettings _animalsSettings;
         private readonly SpawnSettings _settings;
+        private readonly Camera _mainCamera;
         private readonly IObjectResolver _resolver;
 
+        private Rect _bounds;
         private CancellationTokenSource _cts;
 
         public GameplayPresenter(GameplayModel model, GameplayView view,
-            AnimalsSettings animalsSettings, SpawnSettings settings, IObjectResolver resolver)
+            AnimalsSettings animalsSettings, SpawnSettings settings, Camera mainCamera, IObjectResolver resolver)
         {
             _model = model;
             _view = view;
             _animalsSettings = animalsSettings;
             _settings = settings;
+            _mainCamera = mainCamera;
             _resolver = resolver;
         }
 
         public void StartGameplay()
         {
             _cts = new CancellationTokenSource();
+            _bounds = CalculateWorldBounds(_mainCamera);
             BeginSpawnAsync(_cts.Token).Forget();
         }
 
@@ -50,7 +54,7 @@ namespace ZooWorld.Runtime.Gameplay
                 await UniTask.WaitForSeconds(_settings.SpawnDelay, cancellationToken: token);
                 var randomAnimal = GetRandomAnimal();
                 var view = Object.Instantiate(randomAnimal.Animal, GetRandomSpawnPoint(), Quaternion.identity, _view.Parent);
-                var model = new AnimalModel(randomAnimal.Strength);
+                var model = new AnimalModel(randomAnimal.Strength, randomAnimal.CanEatSameStrength);
                 var presenter = new AnimalPresenter(model, view, randomAnimal.MoveStrategy);
                 _resolver.Inject(presenter);
                 _model.AddAnimal(view, model);
@@ -65,7 +69,24 @@ namespace ZooWorld.Runtime.Gameplay
 
         private Vector3 GetRandomSpawnPoint()
         {
-            return _view.SpawnPoints[Random.Range(0, _view.SpawnPoints.Length)].position;
+            var x = Random.Range(_bounds.xMin, _bounds.xMax);
+            var z = Random.Range(_bounds.yMin, _bounds.yMax);
+            return new Vector3(x, _view.Parent.position.y, z);
+        }
+
+        private Rect CalculateWorldBounds(Camera camera)
+        {
+            var halfHeight = camera.orthographicSize;
+            var halfWidth = camera.aspect * halfHeight;
+
+            var camPos = camera.transform.position;
+
+            var xMin = camPos.x - halfWidth;
+            var zMin = camPos.z - halfHeight;
+            var width = halfWidth * 2f;
+            var height = halfHeight * 2f;
+
+            return new Rect(xMin, zMin, width, height);
         }
     }
 }

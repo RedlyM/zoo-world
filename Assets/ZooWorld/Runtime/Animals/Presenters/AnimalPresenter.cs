@@ -5,10 +5,12 @@ using UnityEngine;
 using VContainer;
 using ZooWorld.Runtime.Core;
 using ZooWorld.Runtime.Movements;
+using ZooWorld.Runtime.UI;
+using ZooWorld.Runtime.Utils;
 
 namespace ZooWorld.Runtime.Animals
 {
-    public class AnimalPresenter : IAnimalPresenter, IDisposable
+    public class AnimalPresenter : IDisposable
     {
         private readonly AnimalModel _model;
         private readonly AnimalView _view;
@@ -17,7 +19,13 @@ namespace ZooWorld.Runtime.Animals
         [Inject]
         private readonly CollisionHandler _collisionHandler;
 
-        private CancellationTokenSource _moveCts;
+        [Inject]
+        private readonly AnimalEmotions _emotions;
+
+        [Inject]
+        private readonly GameStats _stats;
+
+        private CancellationTokenSource _lifetimeCts;
 
         public AnimalPresenter(AnimalModel model, AnimalView view, IMovement movement)
         {
@@ -28,16 +36,24 @@ namespace ZooWorld.Runtime.Animals
 
         public void Dispose()
         {
-            _moveCts?.Cancel();
-            _moveCts?.Dispose();
+            StopSimulation();
         }
 
         public void BeginSimulation()
         {
-            _moveCts = new CancellationTokenSource();
+            _lifetimeCts = new CancellationTokenSource();
 
             _view.OnCollision += HandleCollision;
-            _movement.MoveAsync(_view.Self, _moveCts.Token).Forget();
+            _model.Live();
+            _movement.MoveAsync(_view.Self, _lifetimeCts.Token).Forget();
+        }
+
+        private void StopSimulation()
+        {
+            _view.OnCollision -= HandleCollision;
+            _view.gameObject.SetActive(false);
+            _lifetimeCts?.Cancel();
+            _lifetimeCts?.Dispose();
         }
 
         private void HandleCollision(Collision other)
@@ -49,17 +65,32 @@ namespace ZooWorld.Runtime.Animals
                 switch (collisionResult)
                 {
                     case CollisionResult.Nothing:
-                        Debug.Log("Nothing");
+                        _movement.MoveBackAsync(_view.Self, _lifetimeCts.Token).Forget();
                         break;
                     case CollisionResult.Die:
-                        Debug.Log("Die");
+
+                        if (_model.CanEatSameStrength)
+                        {
+                            _stats.IncreasePredatorDeaths();
+                        }
+                        else
+                        {
+                            _stats.IncreasePreyDeaths();
+                        }
+
+                        _view.Collider.isTrigger = true;
+                        _view.PlayDieAnimationAsync(_lifetimeCts.Token).ContinueWith(StopSimulation).Forget();
                         break;
                     case CollisionResult.Kill:
-                        Debug.Log("Kill");
+                        _emotions.ShowTasty(_view.transform);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+            }
+            else if(other.gameObject.TryGetComponent(out Border border))
+            {
+                _movement.MoveBackAsync(_view.Self, _lifetimeCts.Token);
             }
         }
     }

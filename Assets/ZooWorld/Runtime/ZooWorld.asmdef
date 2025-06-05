@@ -5,7 +5,10 @@
         "UniTask",
         "UniTask.DOTween",
         "UniTask.Linq",
-        "VContainer"
+        "VContainer",
+        "UniRx",
+        "DOTween.Modules",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
