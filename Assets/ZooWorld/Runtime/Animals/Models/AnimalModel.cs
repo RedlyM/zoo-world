@@ -13,7 +13,7 @@ namespace ZooWorld.Runtime.Animals
         public bool IsAlive { get; private set; }
         public float LifetimeSeconds { get; private set; }
 
-        private IDisposable _lifetime;
+        private IDisposable _disposable;
 
         public AnimalModel(int strength, bool canEatSameStrength, string identifier)
         {
@@ -27,7 +27,7 @@ namespace ZooWorld.Runtime.Animals
             LifetimeSeconds = 0f;
             IsAlive = true;
 
-            _lifetime = Observable.EveryUpdate()
+            _disposable = Observable.EveryUpdate()
                 .Subscribe(_ =>
                 {
                     LifetimeSeconds += Time.deltaTime;
@@ -39,7 +39,7 @@ namespace ZooWorld.Runtime.Animals
             LifetimeSeconds = 0f;
             IsAlive = false;
 
-            _lifetime?.Dispose();
+            _disposable?.Dispose();
         }
     }
 }
