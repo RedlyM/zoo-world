@@ -45,13 +45,22 @@ namespace ZooWorld.Runtime.Animals
 
             _view.OnCollision += HandleCollision;
             _model.Live();
+            _view.gameObject.SetActive(true);
+            _view.Collider.isTrigger = false;
+            _view.PlayAppearAnimationAsync(_lifetimeCts.Token).Forget();
             _movement.MoveAsync(_view.Self, _lifetimeCts.Token).Forget();
         }
 
         private void StopSimulation()
         {
+            _model.Kill();
+
             _view.OnCollision -= HandleCollision;
             _view.gameObject.SetActive(false);
+            _view.transform.localPosition = Vector3.zero;
+            _view.Self.velocity = Vector3.zero;
+            _view.Self.position = Vector3.zero;
+
             _lifetimeCts?.Cancel();
             _lifetimeCts?.Dispose();
         }

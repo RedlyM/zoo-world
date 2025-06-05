@@ -8,38 +8,38 @@ namespace ZooWorld.Runtime.Animals
     {
         public readonly int Strength;
         public readonly bool CanEatSameStrength;
+        public readonly string Identifier;
 
-        public IReadOnlyReactiveProperty<float> LifetimeSeconds => _lifetimeSeconds;
-        public IReadOnlyReactiveProperty<bool> IsAlive => _isAlive;
-
-        private ReactiveProperty<float> _lifetimeSeconds;
-        private ReactiveProperty<bool> _isAlive;
+        public bool IsAlive { get; private set; }
+        public float LifetimeSeconds { get; private set; }
 
         private IDisposable _lifetime;
 
-        public AnimalModel(int strength, bool canEatSameStrength)
+        public AnimalModel(int strength, bool canEatSameStrength, string identifier)
         {
             Strength = strength;
             CanEatSameStrength = canEatSameStrength;
+            Identifier = identifier;
         }
 
         public void Live()
         {
-            _lifetimeSeconds = new ReactiveProperty<float>(0);
-            _isAlive = new ReactiveProperty<bool>(true);
+            LifetimeSeconds = 0f;
+            IsAlive = true;
 
             _lifetime = Observable.EveryUpdate()
                 .Subscribe(_ =>
                 {
-                    _lifetimeSeconds.Value += Time.deltaTime;
+                    LifetimeSeconds += Time.deltaTime;
                 });
         }
 
         public void Kill()
         {
+            LifetimeSeconds = 0f;
+            IsAlive = false;
+
             _lifetime?.Dispose();
-            _lifetimeSeconds?.Dispose();
-            _isAlive?.Dispose();
         }
     }
 }
