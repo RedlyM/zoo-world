@@ -8,6 +8,7 @@ namespace ZooWorld.Runtime.Animals.Settings
     {
         public AnimalData[] Animals => _animals;
 
-        [SerializeReference] private AnimalData[] _animals;
+        [SerializeReference]
+        private AnimalData[] _animals;
     }
 }
