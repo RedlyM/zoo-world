@@ -1,0 +1,19 @@
+{
+    "name": "ZooWorld",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "UniTask.DOTween",
+        "UniTask.Linq",
+        "VContainer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
