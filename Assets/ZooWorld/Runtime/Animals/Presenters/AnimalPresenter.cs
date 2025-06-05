@@ -45,9 +45,9 @@ namespace ZooWorld.Runtime.Animals
 
             _view.OnCollision += HandleCollision;
             _model.Live();
-            _view.gameObject.SetActive(true);
-            _view.Collider.isTrigger = false;
-            _view.PlayAppearAnimationAsync(_lifetimeCts.Token).Forget();
+
+            _view.Setup();
+            _view.PlayAppearAsync(_lifetimeCts.Token).Forget();
             _movement.MoveAsync(_view.Self, _lifetimeCts.Token).Forget();
         }
 
@@ -55,11 +55,8 @@ namespace ZooWorld.Runtime.Animals
         {
             _model.Kill();
 
+            _view.ResetState();
             _view.OnCollision -= HandleCollision;
-            _view.gameObject.SetActive(false);
-            _view.transform.localPosition = Vector3.zero;
-            _view.Self.velocity = Vector3.zero;
-            _view.Self.position = Vector3.zero;
 
             _lifetimeCts?.Cancel();
             _lifetimeCts?.Dispose();
@@ -87,8 +84,7 @@ namespace ZooWorld.Runtime.Animals
                             _stats.IncreasePreyDeaths();
                         }
 
-                        _view.Collider.isTrigger = true;
-                        _view.PlayDieAnimationAsync(_lifetimeCts.Token).ContinueWith(StopSimulation).Forget();
+                        _view.PlayDieAsync(_lifetimeCts.Token).ContinueWith(StopSimulation).Forget();
                         break;
                     case CollisionResult.Kill:
                         _emotions.ShowTasty(_view.transform);
